@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>iGEM 2025 · 人源 α-乳白蛋白的干湿改造 — 周宏远 作品集</title>
+<meta name="description" content="SCUT-China iGEM 2025（银牌 · Student Leader）：用氢氧化细菌在太空场景下合成可消化的人源 α-乳白蛋白。从演化保守性、ΔΔG、分子对接到代谢建模的计算设计，到表达、纯化与定量的湿实验验证——一条完整的干湿闭环。">
+<style>
+:root{
+  --ink:#1e1e1e; --gray:#5e5e5e; --muted:#9aa3ad; --faint:#cfcfcf;
+  --border:#e5e5e5; --border-strong:#cccccc; --rule:#1e1e1e;
+  --bg:#ffffff; --bg-soft:#f9f9f9; --bg-section:#f4f4f4;
+  --trust:#1f55af; --blind:#a50032; --uncertain:#b8860b; --struct:#5e5e5e;
+  --dry:#1f55af; --wet:#1a7a43;
+  --font:"MorningstarIntrinsic","PingFang SC","Microsoft YaHei",Helvetica,Arial,sans-serif;
+  --mono:"SF Mono",Menlo,Consolas,monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--ink);font-family:var(--font);line-height:1.62;-webkit-font-smoothing:antialiased}
+.wrap{max-width:1000px;margin:0 auto;padding:0 32px}
+@media(max-width:430px){.wrap{padding:0 20px}}
+
+/* ===== 顶栏：四支柱 ===== */
+.topbar{position:sticky;top:0;z-index:50;background:rgba(255,255,255,.94);backdrop-filter:blur(8px);border-bottom:1px solid var(--border)}
+.topbar .row{display:flex;align-items:center;gap:22px;height:58px}
+.brand{display:flex;align-items:center;gap:10px;font-weight:600;font-size:15px;white-space:nowrap}
+.brand .dot{width:9px;height:9px;border-radius:50%;background:var(--blind)}
+.brand small{color:var(--muted);font-weight:400;font-size:12px}
+nav.pages{display:flex;gap:2px;margin-left:auto;flex-wrap:wrap}
+nav.pages a{font-size:13.5px;color:var(--gray);text-decoration:none;padding:6px 12px;font-weight:400;display:flex;gap:7px;align-items:center;white-space:nowrap;border-bottom:3px solid transparent}
+nav.pages a .n{font-family:var(--mono);font-size:11px;color:var(--muted)}
+nav.pages a:hover{color:var(--ink)}
+nav.pages a.active{color:var(--ink);font-weight:600;border-bottom-color:var(--blind)}
+@media(max-width:620px){.topbar .row{height:auto;padding:8px 0;flex-wrap:wrap;gap:6px 8px}.brand small{display:none}nav.pages{margin-left:0}nav.pages a{padding:5px 9px;font-size:12.5px}}
+
+/* ===== HERO ===== */
+.hero{padding:52px 0 22px}
+.kicker{font-family:var(--mono);font-size:11.5px;letter-spacing:2px;text-transform:uppercase;color:var(--blind);margin-bottom:18px;display:flex;align-items:center;gap:11px;flex-wrap:wrap}
+.kicker::before{content:"";width:26px;height:1px;background:var(--blind)}
+.kicker .b{color:var(--gray)}
+h1.title{font-weight:600;font-size:clamp(26px,4.2vw,40px);line-height:1.16;letter-spacing:-.4px}
+h1.title .hl{color:var(--blind)}
+.subtitle{font-size:clamp(15px,1.7vw,17px);color:var(--gray);max-width:780px;margin-top:16px;line-height:1.72}
+.subtitle b{color:var(--ink);font-weight:600}
+.metaline{display:flex;flex-wrap:wrap;gap:8px 10px;margin-top:20px}
+.chip{font-family:var(--mono);font-size:11.5px;letter-spacing:.3px;padding:4px 11px;border:1px solid var(--border-strong);border-radius:24px;color:var(--gray);white-space:nowrap}
+.chip.s{border-color:var(--blind);color:var(--blind)}
+
+/* ===== 通用区块 ===== */
+.figure{background:var(--bg-soft);border:1px solid var(--border);border-radius:10px;padding:22px 22px 14px;margin-top:24px;overflow-x:auto}
+.figure .cap{font-family:var(--mono);font-size:11px;color:var(--gray);margin-top:10px;text-align:center;letter-spacing:.2px;line-height:1.5}
+.figure .legend{display:flex;gap:16px;flex-wrap:wrap;justify-content:center;margin-top:12px;font-size:12px;color:var(--gray)}
+.figure .legend span{display:flex;align-items:center;gap:7px}
+.figure .legend i{width:11px;height:11px;border-radius:50%;display:inline-block}
+.figure .legend i.sq{border-radius:2px}
+
+section{padding:38px 0;border-top:1px solid var(--border)}
+.eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:13px;display:flex;align-items:center;gap:9px}
+.eyebrow b{color:var(--blind)}
+.eyebrow .tag{font-family:var(--mono);font-size:10px;letter-spacing:.5px;padding:2px 8px;border-radius:20px;text-transform:none}
+.tag.dry{color:var(--dry);border:1px solid rgba(31,85,175,.4);background:rgba(31,85,175,.06)}
+.tag.wet{color:var(--wet);border:1px solid rgba(26,122,67,.4);background:rgba(26,122,67,.07)}
+.tag.eng{color:var(--gray);border:1px solid var(--border-strong);background:var(--bg-section)}
+h2{font-weight:600;font-size:clamp(20px,3vw,27px);letter-spacing:-.2px;margin-bottom:10px;line-height:1.22}
+h3{font-weight:600;font-size:15.5px;margin:0 0 9px;color:var(--ink)}
+p{color:var(--gray);margin:12px 0}
+p.lead{font-size:16px;color:var(--ink)}
+strong{color:var(--ink);font-weight:600}
+.mono{font-family:var(--mono)}
+em{font-style:italic;color:var(--ink)}
+code{font-family:var(--mono);font-size:.88em;background:var(--bg-section);padding:2px 6px;border-radius:4px;color:var(--blind);border:1px solid var(--border)}
+a.ilink{color:#0077cf;text-decoration:none;border-bottom:1px solid rgba(0,119,207,.3)}
+a.ilink:hover{border-color:#0077cf}
+.note{font-size:12.5px;color:var(--muted);font-family:var(--mono);margin-top:12px;line-height:1.65}
+.honest{background:var(--bg-section);border-left:3px solid var(--uncertain);border-radius:0 6px 6px 0;padding:13px 16px;font-size:13px;color:var(--gray);margin-top:16px;line-height:1.62}
+.honest b{color:var(--ink)}
+
+/* 网格面板 */
+.grid2{display:grid;grid-template-columns:1.2fr 1fr;gap:16px;margin-top:18px}
+@media(max-width:760px){.grid2{grid-template-columns:1fr}}
+.panel{background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:20px;border-top:2px solid var(--rule)}
+.panel.dryb{border-top-color:var(--dry)}
+.panel.wetb{border-top-color:var(--wet)}
+ul.feat{list-style:none}
+ul.feat li{font-size:13.5px;color:var(--ink);padding:9px 0 9px 22px;position:relative;border-bottom:1px solid var(--border)}
+ul.feat li:last-child{border-bottom:0}
+ul.feat li::before{content:"";position:absolute;left:2px;top:15px;width:7px;height:7px;border-radius:50%;background:var(--trust)}
+ul.feat li.k::before{background:var(--blind)}
+dl.spec{display:grid;grid-template-columns:auto 1fr;gap:9px 16px}
+dl.spec dt{font-family:var(--mono);font-size:12px;color:var(--trust);white-space:nowrap}
+dl.spec dd{font-size:13.5px;color:var(--ink)}
+
+/* 数据表 */
+.dtable{width:100%;border-collapse:collapse;margin-top:18px;font-size:13px}
+.dtable caption{caption-side:top;text-align:left;font-family:var(--mono);font-size:11px;color:var(--gray);margin-bottom:8px;letter-spacing:.3px}
+.dtable th,.dtable td{padding:8px 12px;text-align:left;border-bottom:1px solid var(--border)}
+.dtable thead th{border-bottom:2px solid var(--rule);font-weight:600;font-size:12px;color:var(--gray)}
+.dtable td.num,.dtable th.num{text-align:right;font-family:var(--mono)}
+.dtable tr.sel td{background:rgba(165,0,50,.05)}
+.dtable tr.sel td:first-child{box-shadow:inset 3px 0 0 var(--blind)}
+.dtable .pos{color:var(--wet)} .dtable .neg{color:var(--blind)}
+.dtable .v{font-weight:600;color:var(--ink)}
+
+/* 统计大字带 */
+.statband{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--border);border:1px solid var(--border);border-top:2px solid var(--rule);margin-top:20px}
+.statband .c{background:var(--bg);padding:16px 16px}
+.statband .v{font-size:21px;font-weight:700;color:var(--ink);line-height:1.05;font-family:var(--mono)}
+.statband .v .u{font-size:12px;color:var(--gray);font-weight:400}
+.statband .l{font-size:11.5px;color:var(--gray);margin-top:6px;line-height:1.4}
+.statband .c.hi .v{color:var(--blind)}
+@media(max-width:680px){.statband{grid-template-columns:repeat(2,1fr)}}
+
+/* 流程步骤条 */
+.steps{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:18px;counter-reset:s}
+@media(max-width:720px){.steps{grid-template-columns:repeat(2,1fr)}}
+.steps .st{border:1px solid var(--border);border-top:2px solid var(--wet);border-radius:7px;padding:13px 14px;position:relative}
+.steps .st .k{font-family:var(--mono);font-size:11px;color:var(--muted)}
+.steps .st h4{font-size:13.5px;font-weight:600;margin:3px 0 4px}
+.steps .st p{font-size:12px;margin:0;color:var(--gray);line-height:1.5}
+
+footer{border-top:1px solid var(--border);padding:30px 0 60px;margin-top:26px}
+.prov{background:var(--bg-section);border:1px solid var(--border);border-radius:8px;padding:18px 20px;font-size:12.5px;color:var(--gray);line-height:1.7}
+.prov b{color:var(--ink)} .prov .mono{color:var(--blind);font-size:12px}
+.pager{display:flex;justify-content:space-between;gap:12px;margin-top:22px;flex-wrap:wrap}
+.pager a{text-decoration:none;color:var(--gray);border:1px solid var(--border);border-radius:8px;padding:14px 22px;transition:.18s;background:var(--bg);min-width:220px}
+.pager a:hover{border-color:var(--rule);color:var(--ink)}
+.pager a.next{text-align:right;margin-left:auto}
+.pager .dir{font-family:var(--mono);font-size:11px;color:var(--muted);letter-spacing:.8px}
+.pager .t{font-weight:600;font-size:15px;margin-top:3px}
+::selection{background:rgba(165,0,50,.14)}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="wrap row">
+    <div class="brand"><span class="dot"></span> 周宏远 <small>· 申请作品集</small></div>
+    <nav class="pages">
+      <a href="index.html" class="active"><span class="n">01</span> 生物 · iGEM</a>
+      <a href="data-analysis.html"><span class="n">02</span> 数据分析 · CBA</a>
+      <a href="protein.html"><span class="n">03</span> 机器学习 · 蛋白校准</a>
+      <a href="training-evidence.html"><span class="n">04</span> 模型训练 · Finer</a>
+    </nav>
+  </div>
+</div>
+
+<div class="wrap">
+
+  <!-- HERO -->
+  <header class="hero">
+    <div class="kicker">iGEM 2025 · SCUT-China <span class="b">· 银牌（Silver）· Student Leader</span></div>
+    <h1 class="title">在太空场景下合成<span class="hl">可消化的人源蛋白</span>，<br>用一条干湿闭环把设计落到实物</h1>
+    <p class="subtitle">面向长期太空任务中宇航员的蛋白质供给，团队以氢氧化细菌 <em>Cupriavidus necator</em> H16 为底盘，自养合成<b>人源 α-乳白蛋白（αLA，UniProt P00709）</b>；并通过理性设计在 C 端引入胰蛋白酶切位点（<span class="mono">E121K/R</span>），让消化产物更多落在 PepT1 可吸收的二/三肽上。我作为 <b>Student Leader</b> 统筹干湿两线，亲手完成菌株基因改造筛选与 αLA 的表达纯化。</p>
+    <div class="metaline">
+      <span class="chip s">银牌 · Student Leader</span>
+      <span class="chip">底盘 C. necator H16</span>
+      <span class="chip">干：保守性·ΔΔG·docking·MD·COBRApy</span>
+      <span class="chip">湿：表达·Ni-NTA 纯化·Western·BCA</span>
+    </div>
+
+    <!-- 概览流程图 -->
+    <div class="figure">
+      <svg viewBox="0 0 920 168" width="100%" style="min-width:660px" role="img" aria-label="从太空蛋白需求到 PepT1 吸收的项目流程">
+        <defs>
+          <marker id="ar" markerWidth="9" markerHeight="9" refX="7" refY="4.5" orient="auto">
+            <path d="M0 0 L9 4.5 L0 9 z" fill="#9aa3ad"/>
+          </marker>
+        </defs>
+        <!-- 连接箭头 -->
+        <g stroke="#9aa3ad" stroke-width="1.6" marker-end="url(#ar)">
+          <line x1="156" y1="78" x2="186" y2="78"/>
+          <line x1="348" y1="78" x2="378" y2="78"/>
+          <line x1="540" y1="78" x2="570" y2="78"/>
+          <line x1="732" y1="78" x2="762" y2="78"/>
+        </g>
+        <!-- 节点 -->
+        <g font-family="'PingFang SC','Microsoft YaHei',Helvetica,Arial,sans-serif">
+          <!-- 1 need (neutral) -->
+          <rect x="6" y="46" width="150" height="64" rx="7" fill="#ffffff" stroke="#cccccc" stroke-width="1.3"/>
+          <text x="81" y="72" text-anchor="middle" font-size="12.5" font-weight="600" fill="#1e1e1e">长期太空任务</text>
+          <text x="81" y="90" text-anchor="middle" font-size="11" fill="#5e5e5e">宇航员蛋白供给</text>
+          <!-- 2 chassis (wet/green) -->
+          <rect x="198" y="46" width="150" height="64" rx="7" fill="#ffffff" stroke="#e5e5e5"/>
+          <rect x="198" y="46" width="150" height="3" rx="1.5" fill="#1a7a43"/>
+          <text x="273" y="72" text-anchor="middle" font-size="12.5" font-weight="600" fill="#1e1e1e">C. necator H16</text>
+          <text x="273" y="90" text-anchor="middle" font-size="11" fill="#5e5e5e">H₂/CO₂ 自养底盘</text>
+          <!-- 3 express (wet/green) -->
+          <rect x="390" y="46" width="150" height="64" rx="7" fill="#ffffff" stroke="#e5e5e5"/>
+          <rect x="390" y="46" width="150" height="3" rx="1.5" fill="#1a7a43"/>
+          <text x="465" y="72" text-anchor="middle" font-size="12.5" font-weight="600" fill="#1e1e1e">人源 αLA</text>
+          <text x="465" y="90" text-anchor="middle" font-size="11" fill="#5e5e5e">胞内表达（伴侣协助）</text>
+          <!-- 4 design (dry/blue) -->
+          <rect x="582" y="46" width="150" height="64" rx="7" fill="#ffffff" stroke="#e5e5e5"/>
+          <rect x="582" y="46" width="150" height="3" rx="1.5" fill="#1f55af"/>
+          <text x="657" y="72" text-anchor="middle" font-size="12.5" font-weight="600" fill="#1e1e1e">E121K/R 改造</text>
+          <text x="657" y="90" text-anchor="middle" font-size="11" fill="#5e5e5e">理性设计（干实验）</text>
+          <!-- 5 outcome (neutral) -->
+          <rect x="774" y="46" width="146" height="64" rx="7" fill="#ffffff" stroke="#cccccc" stroke-width="1.3"/>
+          <text x="847" y="72" text-anchor="middle" font-size="12.5" font-weight="600" fill="#1e1e1e">胰蛋白酶切</text>
+          <text x="847" y="90" text-anchor="middle" font-size="11" fill="#5e5e5e">→ PepT1 二/三肽吸收</text>
+        </g>
+        <text x="463" y="22" text-anchor="middle" font-family="Menlo,monospace" font-size="11" fill="#9aa3ad">营养可生物利用度 = 底盘 × 表达 × 消化产物谱型</text>
+      </svg>
+      <div class="cap">图 1 · 项目主线：从太空蛋白供给的需求，到底盘合成、表达、理性改造与消化吸收的闭环</div>
+      <div class="legend">
+        <span><i class="sq" style="background:#1a7a43"></i> 湿实验完成（构建 / 表达 / 纯化）</span>
+        <span><i class="sq" style="background:#1f55af"></i> 干实验设计（理性改造）</span>
+        <span><i class="sq" style="background:#cccccc"></i> 应用情景</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- 01 背景 -->
+  <section>
+    <div class="eyebrow"><b>01</b> · 背景与目标 <span class="tag eng">动机</span></div>
+    <h2>为什么是太空，为什么是人源 α-乳白蛋白</h2>
+    <p class="lead">长期太空任务里，宇航员的优质蛋白补给是一个现实约束。团队的设想是：与其从地球运送，不如让微生物在站内利用宇航员代谢废物（尿素提供氮源）与 CO₂ 自养合成人体所需的蛋白。</p>
+    <p>选择<strong>人源</strong> α-乳白蛋白而非牛源/羊源，是出于营养与可表达性的综合考量。它与人体需求的氨基酸组成更匹配、过敏原性更低、消化吸收率高（&gt;90%）；支链氨基酸（BCAA）含量约为牛源的 1.5 倍，有助对抗微重力引起的肌肉萎缩；色氨酸含量高，半胱氨酸水解产物具抗氧化活性；分子量仅约 14 kDa、结构相对简单，利于异源表达。</p>
+    <div class="grid2">
+      <div class="panel">
+        <h3>两层改造目标</h3>
+        <ul class="feat">
+          <li class="k"><b>底盘表达</b>：在 <em>C. necator</em> H16 中胞内表达人源 αLA，并共表达分子伴侣协助二硫键正确折叠。</li>
+          <li class="k"><b>理性改造</b>：在 αLA 表面引入胰蛋白酶切位点（E121K/R），提升消化产物中 PepT1 可运输的二/三肽比例，从而提高营养生物利用度。</li>
+        </ul>
+      </div>
+      <div class="panel">
+        <h3>对象与编号</h3>
+        <dl class="spec">
+          <dt>蛋白</dt><dd>人源 α-乳白蛋白（基因 LALBA）</dd>
+          <dt>UniProt</dt><dd>P00709（成熟 1–123）</dd>
+          <dt>分子量</dt><dd>≈ 14 kDa</dd>
+          <dt>底盘</dt><dd><em>Cupriavidus necator</em> H16（氢氧化细菌）</dd>
+          <dt>载体</dt><dd>Para-RBS1 骨架 · araBAD 诱导 · C 端 6×His</dd>
+        </dl>
+      </div>
+    </div>
+  </section>
+
+  <!-- 02 改造逻辑 -->
+  <section>
+    <div class="eyebrow"><b>02</b> · 改造逻辑 <span class="tag dry">干实验 · 产物导向</span></div>
+    <h2>蛋白酶敏感性工程：让酶切产物落在 PepT1 上</h2>
+    <p class="lead">小肠经 PepT1（SLC15A1）高效转运二/三肽。若能让 αLA 的胰蛋白酶消化产物优先生成二/三肽，吸收效率即可提升。胰蛋白酶特异地切在 Lys/Arg 之后——因此在合适位置引入 K/R，就能"设计"出新的切割位点与产物。</p>
+
+    <div class="figure">
+      <svg viewBox="0 0 860 230" width="100%" style="min-width:560px" role="img" aria-label="E121K 在 C 端制造提前切点，释放 Lys-Leu 二肽">
+        <!-- 野生型 -->
+        <text x="20" y="44" font-family="Menlo,monospace" font-size="12" fill="#5e5e5e">野生型 C 端</text>
+        <g font-family="Menlo,monospace" font-size="13">
+          <rect x="150" y="26" width="118" height="34" rx="5" fill="#f4f4f4" stroke="#cccccc"/><text x="209" y="48" text-anchor="middle" fill="#1e1e1e">Cys120</text>
+          <rect x="276" y="26" width="118" height="34" rx="5" fill="#f4f4f4" stroke="#cccccc"/><text x="335" y="48" text-anchor="middle" fill="#1e1e1e">Glu121</text>
+          <rect x="402" y="26" width="118" height="34" rx="5" fill="#f4f4f4" stroke="#cccccc"/><text x="461" y="48" text-anchor="middle" fill="#1e1e1e">Lys122</text>
+          <rect x="528" y="26" width="118" height="34" rx="5" fill="#f4f4f4" stroke="#cccccc"/><text x="587" y="48" text-anchor="middle" fill="#1e1e1e">Leu123</text>
+        </g>
+        <!-- WT cut after K122 -->
+        <line x1="520" y1="18" x2="520" y2="68" stroke="#9aa3ad" stroke-width="1.6" stroke-dasharray="3 3"/>
+        <text x="660" y="40" font-family="Menlo,monospace" font-size="11" fill="#9aa3ad">切于 Lys122 后</text>
+        <text x="660" y="56" font-family="Menlo,monospace" font-size="11" fill="#9aa3ad">→ 释放单个 Lys（不利吸收）</text>
+
+        <!-- 箭头 -->
+        <text x="20" y="125" font-family="Menlo,monospace" font-size="12" fill="#1f55af">E121K 改造</text>
+        <path d="M150 100 L150 150" stroke="#1f55af" stroke-width="1.4" marker-end="url(#ar2)"/>
+        <defs><marker id="ar2" markerWidth="9" markerHeight="9" refX="4.5" refY="8" orient="auto"><path d="M0 0 L9 0 L4.5 9 z" fill="#1f55af"/></marker></defs>
+
+        <!-- 突变型 -->
+        <g font-family="Menlo,monospace" font-size="13">
+          <rect x="150" y="158" width="118" height="34" rx="5" fill="#f4f4f4" stroke="#cccccc"/><text x="209" y="180" text-anchor="middle" fill="#1e1e1e">Cys120</text>
+          <rect x="276" y="158" width="118" height="34" rx="5" fill="#eaf0fa" stroke="#1f55af"/><text x="335" y="180" text-anchor="middle" fill="#1f55af" font-weight="700">Lys121</text>
+          <rect x="402" y="158" width="118" height="34" rx="5" fill="#e9f3ee" stroke="#1a7a43"/><text x="461" y="180" text-anchor="middle" fill="#1a7a43">Lys122</text>
+          <rect x="528" y="158" width="118" height="34" rx="5" fill="#e9f3ee" stroke="#1a7a43"/><text x="587" y="180" text-anchor="middle" fill="#1a7a43">Leu123</text>
+        </g>
+        <!-- mutant cut after K121 -->
+        <line x1="394" y1="150" x2="394" y2="200" stroke="#a50032" stroke-width="1.8"/>
+        <text x="372" y="148" font-family="Menlo,monospace" font-size="11" fill="#a50032">✂ 切于 Lys121 后</text>
+        <path d="M408 214 H640" stroke="#1a7a43" stroke-width="1.4"/>
+        <text x="660" y="180" font-family="Menlo,monospace" font-size="11" fill="#1a7a43">→ 释放 Lys–Leu 二肽</text>
+        <text x="660" y="196" font-family="Menlo,monospace" font-size="11" fill="#1a7a43">→ PepT1 可吸收</text>
+      </svg>
+      <div class="cap">图 2 · E121K 在 C 端制造提前切点：胰蛋白酶切于 Lys121 后，释放 Lys–Leu 二肽（PepT1 底物）。E121R 同理产生 Arg–Leu；而 L123K 只在天然 Lys122 后切，释放单个 Lys，吸收不利——故 E121K/R 为最优。</div>
+    </div>
+  </section>
+
+  <!-- 03 干实验管线 -->
+  <section>
+    <div class="eyebrow"><b>03</b> · 计算设计管线 <span class="tag dry">干实验</span></div>
+    <h2>用四道计算筛选定下 E121K/R</h2>
+    <p class="lead">候选位点不是拍脑袋选的，而是经过一条可复核的筛选：先用演化保守性与溶剂可及性圈出"可改造、在表面"的位点，再用 ΔΔG 共识与分子对接判断"改了稳不稳、酶切好不好"，最后以分子动力学验证整体构象不被破坏。</p>
+
+    <div class="grid2">
+      <div class="panel dryb">
+        <h3>① 演化保守性 + ② 溶剂可及性</h3>
+        <p style="font-size:13px;margin:6px 0 0">以人源 αLA 为探针做多序列比对、建系统发育树，用 <b>Shannon 熵</b> 量化每个位点的可变性（熵越高越可改）；再叠加 <b>SASA</b> 选取表面暴露残基。C 端区（含 121、122、123）在高可变 + 高暴露列表中集中出现，被定为改造热点。低 SASA 的深埋残基（如 A92，SASA 仅 3.63%）即便 ΔΔG 友好也予排除。</p>
+      </div>
+      <div class="panel dryb">
+        <h3>③ ΔΔG 稳定性 + ④ 分子对接</h3>
+        <p style="font-size:13px;margin:6px 0 0">用 <b>CUPSAT（经验势）</b>与 <b>MUpro（SVM）</b>两种不同原理的方法做共识 ΔΔG 筛选，预警阈值 +2.0 kcal/mol；再用<b>分子对接</b>评估改造后与胰蛋白酶的结合（STRING 验证两者存在功能相互作用，得分 0.449）。两者交叉确认 E121K/R 既不失稳、又改善酶切几何。</p>
+      </div>
+    </div>
+
+    <table class="dtable">
+      <caption>表 1 · 候选突变的 ΔΔG 共识筛选（负值 = 预测更稳定；两法一致性决定取舍）</caption>
+      <thead>
+        <tr><th>突变</th><th class="num">CUPSAT ΔΔG</th><th class="num">MUpro ΔΔG</th><th>评级</th></tr>
+      </thead>
+      <tbody>
+        <tr class="sel"><td><span class="v">E121K</span></td><td class="num neg">−0.20</td><td class="num neg">−0.54</td><td>两法均预测更稳定 · <b>最优，选定</b></td></tr>
+        <tr class="sel"><td><span class="v">E121R</span></td><td class="num neg">−0.24</td><td class="num neg">−0.40</td><td>两法均预测更稳定 · <b>优，选定</b></td></tr>
+        <tr><td>L123K</td><td class="num neg">−0.28</td><td class="num pos">+0.11</td><td>两法结果冲突，风险极低（次优）</td></tr>
+        <tr><td>L123R</td><td class="num neg">−0.54</td><td class="num pos">+0.32</td><td>两法结果冲突，风险低</td></tr>
+        <tr><td>I98K</td><td class="num pos">+0.86</td><td class="num pos">+0.12</td><td>轻微去稳定，远低于阈值</td></tr>
+        <tr><td>A92K</td><td class="num neg">−0.43</td><td class="num neg">−0.02</td><td>稳定但 SASA 仅 3.63%，功能可及性差 · 排除</td></tr>
+        <tr><td>L26K</td><td class="num pos">+0.55</td><td class="num pos">+0.23</td><td>去稳定 · 放弃</td></tr>
+        <tr><td>L26R</td><td class="num pos">+1.14</td><td class="num pos">+0.40</td><td>去稳定（CUPSAT &gt;1.0）· 放弃</td></tr>
+      </tbody>
+    </table>
+
+    <table class="dtable">
+      <caption>表 2 · 分子对接：改造后与胰蛋白酶的结合更紧、催化几何更理想（vs 野生型）</caption>
+      <thead>
+        <tr><th>指标</th><th class="num">野生型</th><th class="num">E121K</th><th class="num">E121R</th><th>方向</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>结合得分（Docking Score）</td><td class="num">−287.67</td><td class="num v">−372.37</td><td class="num">−315.40</td><td>越负越好</td></tr>
+        <tr><td>界面氢键数</td><td class="num">7</td><td class="num v">12</td><td class="num">11</td><td>越多越好</td></tr>
+        <tr><td>配体 RMSD（nm）</td><td class="num">0.35</td><td class="num v">0.22</td><td class="num">0.25</td><td>越小越稳</td></tr>
+        <tr><td>催化距离（Å）</td><td class="num">5.8</td><td class="num v">3.5</td><td class="num">3.7</td><td>落入理想范围</td></tr>
+      </tbody>
+    </table>
+    <p class="note">⑤ 全原子分子动力学（MD）：用 RMSD / RMSF / 回转半径 / DSSP 及关键氢键占有率，验证突变不破坏整体折叠与钙结合环构象（分析框架已设计）。</p>
+
+    <!-- 约束图 -->
+    <div class="figure">
+      <svg viewBox="0 0 900 210" width="100%" style="min-width:600px" role="img" aria-label="αLA 的硬约束：四对二硫键与钙结合环不可改造，改造只在 121">
+        <!-- Ca loop band -->
+        <rect x="564" y="138" width="61" height="24" fill="rgba(184,134,11,.16)" stroke="#b8860b" stroke-width="1" stroke-dasharray="3 2"/>
+        <text x="594" y="200" text-anchor="middle" font-family="Menlo,monospace" font-size="10.5" fill="#b8860b">钙结合环 79–88</text>
+        <!-- arcs -->
+        <path d="M73.6 150 Q456.7 26 839.8 150" fill="none" stroke="#5e5e5e" stroke-width="1.8"/>
+        <path d="M221.5 150 Q500.4 60 779.3 150" fill="none" stroke="#5e5e5e" stroke-width="1.6"/>
+        <path d="M443.3 150 Q497 100 550.8 150" fill="none" stroke="#5e5e5e" stroke-width="1.6"/>
+        <path d="M523.9 150 Q584.4 86 644.9 150" fill="none" stroke="#5e5e5e" stroke-width="1.6"/>
+        <text x="456" y="40" text-anchor="middle" font-family="Menlo,monospace" font-size="11" fill="#5e5e5e">四对二硫键 6–120 / 28–111 / 61–77 / 73–91（高度保守，不可改造）</text>
+        <!-- axis -->
+        <line x1="40" y1="150" x2="860" y2="150" stroke="#cccccc" stroke-width="3"/>
+        <text x="40" y="178" font-family="Menlo,monospace" font-size="11" fill="#9aa3ad">1</text>
+        <text x="860" y="178" text-anchor="end" font-family="Menlo,monospace" font-size="11" fill="#9aa3ad">123</text>
+        <!-- Cys nodes -->
+        <g font-family="Menlo,monospace" font-size="11" fill="#5e5e5e">
+          <circle cx="73.6" cy="150" r="6" fill="#5e5e5e"/><text x="73.6" y="172" text-anchor="middle">6</text>
+          <circle cx="221.5" cy="150" r="6" fill="#5e5e5e"/><text x="221.5" y="172" text-anchor="middle">28</text>
+          <circle cx="443.3" cy="150" r="6" fill="#5e5e5e"/><text x="443.3" y="172" text-anchor="middle">61</text>
+          <circle cx="523.9" cy="150" r="6" fill="#5e5e5e"/><text x="523.9" y="172" text-anchor="middle">73</text>
+          <circle cx="550.8" cy="150" r="6" fill="#5e5e5e"/><text x="556" y="188" text-anchor="middle">77</text>
+          <circle cx="644.9" cy="150" r="6" fill="#5e5e5e"/><text x="644.9" y="172" text-anchor="middle">91</text>
+          <circle cx="779.3" cy="150" r="6" fill="#5e5e5e"/><text x="779.3" y="172" text-anchor="middle">111</text>
+          <circle cx="839.8" cy="150" r="7" fill="#1e1e1e"/><text x="832" y="172" text-anchor="middle" fill="#1e1e1e" font-weight="700">120</text>
+        </g>
+        <!-- mut site 121 -->
+        <path d="M846.6 130 l7 -13 l7 13 z" fill="#1f55af"/>
+        <line x1="846.6" y1="133" x2="846.6" y2="146" stroke="#1f55af" stroke-width="1.4"/>
+        <text x="872" y="112" text-anchor="end" font-family="Menlo,monospace" font-size="11" font-weight="700" fill="#1f55af">E121K/R 改造位点</text>
+      </svg>
+      <div class="cap">图 3 · 改造的硬约束边界：四对二硫键的 8 个 Cys 与钙结合环（79–88）高度保守、不可触碰；改造严格限定在表面的 121 位点。</div>
+      <div class="legend">
+        <span><i style="background:#5e5e5e"></i> 二硫键 Cys（保守约束）</span>
+        <span><i class="sq" style="background:#b8860b"></i> 钙结合环</span>
+        <span><i style="background:#1f55af"></i> 改造位点 121</span>
+      </div>
+    </div>
+    <p style="font-size:13px;margin-top:14px">这张约束图也埋下了后续个人研究的种子：改造位点 121 紧邻跨度最大的 6–120 长程二硫桥一端（Cys120）。当湿实验未达预期时，正是这处"紧邻硬约束"的细节，把我引向"序列模型是否真的可靠刻画了这些二硫键"的问题 —— 详见 <a class="ilink" href="protein.html">机器学习 · 蛋白校准</a>。</p>
+  </section>
+
+  <!-- 04 代谢工程 -->
+  <section>
+    <div class="eyebrow"><b>04</b> · 底盘代谢工程 <span class="tag dry">干实验 · COBRApy</span></div>
+    <h2>用代谢模型回答"太空里到底产不产得出来"</h2>
+    <p class="lead">在投入湿实验前，先用基于 <em>C. necator</em> H16 基因组尺度模型的 COBRApy 框架评估可行性：pFBA / FVA 分别在自养（H₂/CO₂）与异养条件下估算最大生长速率与 αLA 合成通量，并用 Trade-off 曲线刻画碳氮约束。</p>
+    <p>迭代敲除筛选出 14 个能显著提升生物量的反应，最终选定敲除 <code>H16_A3598</code>（乙醛酸碳连接酶），减少乙醛酸支路通量、把更多碳引向 TCA 循环与氨基酸/能量供应；并用 Escher 图可视化核心通量。结论是：自养条件下产 αLA 在机理上可行（"低产但可行"），且产物合成随生长率同步增加。</p>
+    <div class="statband">
+      <div class="c hi"><div class="v">0.2852<span class="u"> g·L⁻¹·d⁻¹</span></div><div class="l">理论日产量估算（OD₆₀₀=0.4）</div></div>
+      <div class="c"><div class="v">502.92<span class="u"> g/d</span></div><div class="l">尿素为氮源理论产蛋白（6 人，80% 转化）</div></div>
+      <div class="c"><div class="v">480<span class="u"> g/d</span></div><div class="l">6 人每日蛋白需求（参照）</div></div>
+      <div class="c"><div class="v">H16_A3598</div><div class="l">干实验指导的代谢敲除靶点</div></div>
+    </div>
+    <p class="note">数据为模型估算（pFBA/FVA），用于可行性论证，非湿实验测得产量。</p>
+  </section>
+
+  <!-- 05 湿实验 -->
+  <section>
+    <div class="eyebrow"><b>05</b> · 表达 · 纯化 · 验证 <span class="tag wet">湿实验</span></div>
+    <h2>把设计做成可以拿在手上的蛋白</h2>
+    <p class="lead">干实验给出方向后，湿实验把人源 αLA 真正在 <em>C. necator</em> H16 里表达出来、纯化出来、定量出来。这是我个人投入最深的部分。</p>
+
+    <div class="steps">
+      <div class="st"><div class="k">STEP 1</div><h4>构建</h4><p>Para-RBS1 骨架，Gibson Assembly 克隆 hLALBA（C 端 6×His）与分子伴侣。</p></div>
+      <div class="st"><div class="k">STEP 2</div><h4>诱导</h4><p>比较 4 种启动子后选定 PBAD（阿拉伯糖），约 800× 诱导、近零本底。</p></div>
+      <div class="st"><div class="k">STEP 3</div><h4>表达验证</h4><p>抗 His 抗体 Western Blot 检出预期分子量条带，未诱导组几乎无信号。</p></div>
+      <div class="st"><div class="k">STEP 4</div><h4>纯化定量</h4><p>1 L 扩培→超声裂解→Ni-NTA 亲和层析；SDS-PAGE ≈14.2 kDa；BCA 定量。</p></div>
+    </div>
+
+    <div class="grid2" style="margin-top:22px">
+      <div class="panel wetb">
+        <h3>分子伴侣：一段真实的工程取舍</h3>
+        <p style="font-size:13px;margin:6px 0 0">为帮助二硫键折叠，设计了两组伴侣共表达：<b>Group A</b> 为 hPDIA3（ER 氧化还原折叠酶）；<b>Group B</b> 原计划 KAR2+SLY1，但 KAR2 反复克隆失败，最终仅保留 SLY1（单独克隆成功）。这类"方案随实验现实迭代"的取舍，是工程过程的常态。</p>
+      </div>
+      <div class="panel wetb">
+        <h3>自养验证</h3>
+        <p style="font-size:13px;margin:6px 0 0">以<b>尿素为唯一氮源</b>培养 <em>C. necator</em> H16：10 天内 OD 显著上升、生长稳定，而仅含硫酸铵的对照生长极弱——支持"利用宇航员代谢废物自养产蛋白"的设想。Group A（hPDI）在尿素条件下生长优于 Group B（SLY1）。</p>
+      </div>
+    </div>
+
+    <table class="dtable">
+      <caption>表 3 · Ni-NTA 纯化后 BCA 定量（μg/mL）；C. necator 产量与 B. subtilis 同数量级</caption>
+      <thead>
+        <tr><th>菌株 / 宿主</th><th class="num">250 mM 咪唑洗脱</th><th class="num">500 mM 咪唑洗脱</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Group A（hLALBA-hPDI）· <em>C. necator</em></td><td class="num v">197.41</td><td class="num">139.92</td></tr>
+        <tr><td>Group B（hLALBA-SLY1）· <em>C. necator</em></td><td class="num">182.82</td><td class="num">135.63</td></tr>
+        <tr><td>A7E（Group A）· <em>E. coli</em></td><td class="num v">332.13</td><td class="num">—</td></tr>
+        <tr><td>B1E（Group B）· <em>E. coli</em></td><td class="num">202.56</td><td class="num">—</td></tr>
+      </tbody>
+    </table>
+
+    <div class="honest">
+      <b>诚实边界 ·</b> Western/His 检测证明<b>表达</b>，不等于<b>正确折叠</b>（CD 圆二色谱列入后续 Cycle 计划）。E121K/R 的<b>湿实验功能验证</b>（胰蛋白酶消化质谱、PepT1 吸收实验）<b>尚未完成</b>——E121K/R 属干实验设计阶段的结论，未经湿实验验证。本页对改造效果不作经实验证实的断言。
+    </div>
+  </section>
+
+  <!-- 06 角色与衔接 -->
+  <section>
+    <div class="eyebrow"><b>06</b> · 我的角色与收获 <span class="tag eng">综述</span></div>
+    <h2>干湿两线我都在场，这正是它的价值</h2>
+    <p class="lead">作为 Student Leader，我统筹干实验设计与湿实验验证两条线及跨学科协作，并亲手完成菌株基因改造筛选与人源 αLA 的表达纯化。</p>
+    <p>这个项目让我完整走过一次"计算设计 → 构建表达 → 纯化验证"的闭环，也让我直接体会到干预测与湿结果之间的落差——E121K/R 在干实验中评分优异，湿实验却未达预期。这处落差没有被搁置，而是变成了我个人研究的起点：与其继续设计，不如先回头检验"我所依赖的模型，是否真的可靠"。这条线索通向我的 <a class="ilink" href="protein.html">蛋白校准研究</a>，也贯穿到我在 <a class="ilink" href="data-analysis.html">数据分析</a> 与 <a class="ilink" href="training-evidence.html">模型训练</a> 中关心的同一件事：让模型与数据的判断，在被采用之前先经得起检验。</p>
+  </section>
+
+  <footer>
+    <div class="prov">
+      <b>来源与口径 ·</b> 本页事实忠于 SCUT-China iGEM 2025 wiki（<span class="mono">2025.igem.wiki/scut-china</span>）：改造目标、突变位点、ΔΔG/对接/代谢数据均取自该 wiki。E121K/R 的设计动机以官方 wiki 为准——引入胰蛋白酶切位点、提升经 PepT1 的消化吸收；wiki 未涉及抗菌或 HAMLET 相关改造。银牌与 Student Leader 可经 <span class="mono">teams.igem.org/5781</span> 核验。凡 wiki 未明确记载者（如 E121K/R 的湿验证）均已注明未完成。
+    </div>
+    <div class="pager">
+      <a class="next" href="data-analysis.html"><div class="dir">下一支柱 →</div><div class="t">02 · 数据分析 · CBA 因果推断</div></a>
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>

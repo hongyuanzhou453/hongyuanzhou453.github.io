@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>hLA-AI-redesign · 校准发现 (3/3)</title>
+<meta name="description" content="ESM2 在人源 α-乳白蛋白二硫键上的校准结果：8 个二硫键 Cys 中 7 个被正确召回，唯一漏掉 Cys120（C→K LLR=+0.995）。数据核验自 2337 行实测矩阵。">
+<style>
+/* ===== 晨星机构白 · 设计系统 (见 01_晨星设计系统.md) ===== */
+:root{
+  --ink:#1e1e1e; --gray:#5e5e5e; --muted:#ababab; --faint:#cfcfcf;
+  --border:#e5e5e5; --border-strong:#cccccc; --rule:#333333;
+  --bg:#ffffff; --bg-soft:#f9f9f9; --bg-section:#f5f5f5;
+  /* 生物语义色 */
+  --trust:#1f55af;   /* 可信 / 召回 */
+  --blind:#a50032;   /* 盲点 / 漏掉 */
+  --uncertain:#b8860b; /* 不确定 / 慎用 (gold, 调暗以适配白底) */
+  --struct:#5e5e5e;  /* 结构 / 中性 */
+  --font:"MorningstarIntrinsic","PingFang SC","Microsoft YaHei",Helvetica,Arial,sans-serif;
+  --mono:Menlo,Consolas,monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--ink);font-family:var(--font);line-height:1.6;-webkit-font-smoothing:antialiased}
+.wrap{max-width:1040px;margin:0 auto;padding:0 32px}
+@media(max-width:430px){.wrap{padding:0 20px}}
+
+/* topbar */
+.topbar{position:sticky;top:0;z-index:50;background:rgba(255,255,255,.94);backdrop-filter:blur(8px);border-bottom:1px solid var(--border)}
+.topbar .row{display:flex;align-items:center;gap:22px;height:58px}
+.brand{display:flex;align-items:center;gap:10px;font-weight:600;font-size:15px;white-space:nowrap}
+.brand .dot{width:9px;height:9px;border-radius:50%;background:var(--blind)}
+.brand small{color:var(--muted);font-weight:400;font-size:12px}
+nav.pages{display:flex;gap:2px;margin-left:auto;flex-wrap:wrap}
+nav.pages a{font-size:13.5px;color:var(--gray);text-decoration:none;padding:6px 12px;font-weight:400;display:flex;gap:7px;align-items:center;white-space:nowrap;border-bottom:3px solid transparent}
+nav.pages a .n{font-family:var(--mono);font-size:11px;color:var(--muted)}
+nav.pages a:hover{color:var(--ink)}
+nav.pages a.active{color:var(--ink);font-weight:600;border-bottom-color:var(--blind)}
+@media(max-width:620px){.topbar .row{height:auto;padding:8px 0;flex-wrap:wrap;gap:6px 8px}.brand small{display:none}nav.pages{margin-left:0}nav.pages a{padding:5px 9px;font-size:12.5px}}
+
+.subbar{background:var(--bg-soft);border-bottom:1px solid var(--border)}
+.subbar .row{display:flex;align-items:center;gap:16px;height:42px;flex-wrap:wrap}
+.subbar .lbl{font-family:var(--mono);font-size:11px;letter-spacing:1px;text-transform:uppercase;color:var(--muted)}
+.subbar a{font-size:13px;color:var(--gray);text-decoration:none;display:flex;gap:6px;align-items:center}
+.subbar a .n{font-family:var(--mono);font-size:11px;color:var(--muted)}
+.subbar a:hover{color:var(--ink)}
+.subbar a.active{color:var(--ink);font-weight:600}
+
+/* hero */
+.hero{padding:42px 0 6px}
+.kicker{font-family:var(--mono);font-size:11.5px;letter-spacing:2.5px;text-transform:uppercase;color:var(--blind);margin-bottom:16px;display:flex;align-items:center;gap:11px}
+.kicker::before{content:"";width:26px;height:1px;background:var(--blind)}
+h1.title{font-weight:600;font-size:clamp(26px,4vw,38px);line-height:1.12;letter-spacing:-.3px}
+h1.title .g{color:var(--trust)} h1.title .c{color:var(--blind)}
+.subtitle{font-size:16px;color:var(--gray);max-width:740px;margin-top:14px}
+.subtitle b{color:var(--ink);font-weight:600}
+
+section{padding:38px 0;border-top:1px solid var(--border)}
+.eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:13px}
+.eyebrow b{color:var(--blind)}
+h2{font-weight:600;font-size:clamp(20px,3vw,26px);letter-spacing:-.2px;margin-bottom:8px;line-height:1.18}
+h3{font-weight:600;font-size:17px;margin:20px 0 9px}
+p{color:var(--gray);margin:11px 0}
+p.lead{font-size:16px;color:var(--ink)}
+.mono{font-family:var(--mono)}
+code{font-family:var(--mono);font-size:.88em;background:var(--bg-section);padding:2px 6px;border-radius:4px;color:var(--blind);border:1px solid var(--border)}
+strong{color:var(--ink);font-weight:600}
+a.ilink{color:#0077cf;text-decoration:none;border-bottom:1px solid rgba(0,119,207,.3)}
+a.ilink:hover{border-color:#0077cf}
+.note{font-size:12.5px;color:var(--muted);font-family:var(--mono);margin-top:12px;line-height:1.65}
+
+/* headline metric band */
+.metricband{display:grid;grid-template-columns:auto 1fr;gap:28px;align-items:center;margin-top:24px;
+  background:var(--bg-soft);border:1px solid var(--border);border-radius:8px;padding:26px 30px}
+@media(max-width:640px){.metricband{grid-template-columns:1fr;gap:14px}}
+.metricband .big{font-weight:700;font-size:70px;line-height:.9;color:var(--trust)}
+.metricband .big small{font-size:36px;color:var(--muted);font-weight:400}
+.metricband .big .sub{display:block;font-size:12.5px;color:var(--gray);font-family:var(--mono);font-weight:500;margin-top:8px;letter-spacing:.3px}
+.metricband .txt p{margin:0 0 8px;color:var(--ink)}
+
+/* figure */
+.figure{background:var(--bg);border:1px solid var(--border-strong);border-radius:16px;padding:24px 22px 18px;margin-top:22px;overflow-x:auto}
+.figure .cap{font-family:var(--mono);font-size:10.5px;letter-spacing:1.2px;text-transform:uppercase;color:var(--gray);margin-bottom:5px}
+.figure .ttl{font-weight:600;font-size:16px;margin-bottom:18px;color:var(--ink)}
+.legend{display:flex;gap:18px;flex-wrap:wrap;margin-top:14px;font-size:12.5px;color:var(--gray)}
+.legend span{display:flex;align-items:center;gap:7px}
+.legend i{width:12px;height:12px;border-radius:50%;display:inline-block}
+
+/* diverging LLR bar chart */
+.llr{margin-top:10px}
+.llr .row{display:grid;grid-template-columns:128px 1fr 78px;gap:12px;align-items:center;margin:7px 0}
+@media(max-width:640px){.llr .row{grid-template-columns:96px 1fr 66px;gap:8px}}
+.llr .lab{font-family:var(--mono);font-size:12.5px;color:var(--gray)}
+.llr .lab b{color:var(--ink)}
+.llr .track{position:relative;height:24px;background:var(--bg-section);border-radius:3px;overflow:hidden;border:1px solid var(--border)}
+.llr .zero{position:absolute;top:-3px;bottom:-3px;width:2px;background:var(--rule);left:86.4%}
+.llr .bar{position:absolute;top:4px;bottom:4px;border-radius:2px}
+.llr .bar.neg{background:var(--trust)}
+.llr .bar.pos{background:var(--blind)}
+.llr .val{font-family:var(--mono);font-size:12.5px;text-align:right}
+.llr .val.neg{color:var(--trust)} .llr .val.pos{color:var(--blind);font-weight:700}
+.llr .axis{display:grid;grid-template-columns:128px 1fr 78px;gap:12px;margin-top:8px}
+@media(max-width:640px){.llr .axis{grid-template-columns:96px 1fr 66px}}
+.llr .axis .scale{position:relative;height:16px;font-family:var(--mono);font-size:10px;color:var(--muted)}
+.llr .axis .scale .z{position:absolute;left:86.4%;transform:translateX(-50%);color:var(--gray)}
+.llr .axis .scale .l{position:absolute;left:0} .llr .axis .scale .r{position:absolute;right:0}
+
+/* table */
+.tbl{width:100%;border-collapse:collapse;margin-top:18px;font-size:13px;border:1px solid var(--border)}
+.tbl thead th{background:var(--bg-section);text-align:left;padding:10px 13px;font-family:var(--mono);font-size:10.5px;letter-spacing:.8px;text-transform:uppercase;color:var(--gray);border-bottom:1px solid var(--border)}
+.tbl td{padding:9px 13px;border-bottom:1px solid var(--border);color:var(--ink);font-family:var(--mono);font-size:12.5px}
+.tbl td:nth-child(4),.tbl th:nth-child(4){text-align:right}
+.tbl tbody tr:last-child td{border-bottom:0}
+.tbl tr.miss td{background:rgba(165,0,50,.05)}
+.tbl tr.miss td:last-child{color:var(--blind);font-weight:700}
+.tbl .ok{color:var(--trust)}
+.scrollx{overflow-x:auto}
+
+/* interpretation cards */
+.cards{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:20px}
+@media(max-width:720px){.cards{grid-template-columns:1fr}}
+.card{background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:20px;border-top:2px solid var(--rule)}
+.card .ic{font-family:var(--mono);font-size:10.5px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;margin-bottom:9px}
+.card.seq{border-top-color:var(--trust)} .card.seq .ic{color:var(--trust)}
+.card.str{border-top-color:var(--uncertain)} .card.str .ic{color:var(--uncertain)}
+.card h4{font-size:16px;font-weight:600;margin-bottom:7px}
+.card p{font-size:13.5px;color:var(--gray);margin:6px 0}
+
+/* callout */
+.callout{margin-top:22px;border-radius:8px;padding:22px 26px;background:var(--bg-soft);border:1px solid var(--border);border-left:3px solid var(--blind)}
+.callout .h{font-weight:600;font-size:18px;margin-bottom:7px;color:var(--ink)}
+.callout p{font-size:14px;margin:7px 0;color:var(--gray)}
+
+/* provenance / correction */
+.prove{margin-top:24px;border-radius:8px;border:1px solid var(--border);background:var(--bg-soft);padding:22px 26px;border-left:3px solid var(--uncertain)}
+.prove .h{font-weight:600;font-size:17px;color:var(--ink);margin-bottom:7px;display:flex;align-items:center;gap:8px}
+.prove table{width:100%;border-collapse:collapse;margin-top:12px;font-size:13px}
+.prove td,.prove th{padding:9px 12px;border:1px solid var(--border);text-align:left;vertical-align:top}
+.prove th{font-family:var(--mono);font-size:10.5px;text-transform:uppercase;letter-spacing:.5px;color:var(--gray);background:var(--bg-section)}
+.prove .was{color:var(--blind)} .prove .is{color:var(--trust);font-weight:600}
+
+/* sanity stats */
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:1px;background:var(--border);border:1px solid var(--border);margin-top:20px}
+.stat{background:var(--bg);padding:18px}
+.stat .v{font-weight:700;font-size:25px;color:var(--ink)}
+.stat .v small{font-size:14px;color:var(--gray);font-weight:400}
+.stat .l{font-size:12px;color:var(--gray);margin-top:4px}
+
+footer{border-top:1px solid var(--border);padding:32px 0 60px;margin-top:28px}
+.prov{background:var(--bg-section);border:1px solid var(--border);border-radius:8px;padding:18px 20px;font-size:12.5px;color:var(--gray);line-height:1.7}
+.prov b{color:var(--ink)} .prov .mono{color:var(--blind);font-size:12px}
+.pager{display:flex;justify-content:space-between;margin-top:24px;gap:12px;flex-wrap:wrap}
+.pager a{text-decoration:none;color:var(--gray);border:1px solid var(--border);border-radius:8px;padding:14px 20px;flex:1;min-width:200px;transition:.18s;background:var(--bg)}
+.pager a:hover{border-color:var(--rule);color:var(--ink)}
+.pager .dir{font-family:var(--mono);font-size:11px;color:var(--muted);letter-spacing:.8px}
+.pager .t{font-weight:600;font-size:15px;margin-top:3px}
+.pager a.next{text-align:right}
+::selection{background:rgba(31,85,175,.16)}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="wrap row">
+    <div class="brand"><span class="dot"></span> 周宏远 <small>· 申请作品集</small></div>
+    <nav class="pages">
+      <a href="index.html"><span class="n">01</span> 生物 · iGEM</a>
+      <a href="data-analysis.html"><span class="n">02</span> 数据分析 · CBA</a>
+      <a href="protein.html"><span class="n">03</span> 机器学习 · 蛋白校准</a>
+      <a href="training-evidence.html"><span class="n">04</span> 模型训练 · Finer</a>
+    </nav>
+  </div>
+</div>
+<div class="subbar">
+  <div class="wrap row">
+    <span class="lbl">机器学习 · 蛋白校准研究</span>
+    <a href="protein.html"><span class="n">01</span> 背景与方法</a>
+    <a href="findings.html" class="active"><span class="n">02</span> 校准发现</a>
+  </div>
+</div>
+
+<div class="wrap">
+
+  <header class="hero">
+    <div class="kicker">第一个校准信号 · M1 ESM2 二硫键测试</div>
+    <h1 class="title">ESM2 看得见 <span class="g">7 座</span>二硫桥，<br>却把<span class="c">第 8 座</span>当成了可改的位置</h1>
+    <p class="subtitle">承接第 1 页的问题，这一页给出 ESM2 在 α-乳白蛋白二硫键上的实测结果：模型正确识别了 8 个半胱氨酸中的 7 个，唯独漏掉 <b>Cys120</b>——也就是 iGEM 改造位点紧邻的那个残基。下面所有数字均核验自 <span class="mono">esm_dms_matrix.tsv</span> 的 2337 行实测打分。</p>
+
+    <div class="metricband">
+      <div class="big">7<small>/8</small><span class="sub">二硫键 Cys 被正确召回</span></div>
+      <div class="txt">
+        <p>在 αLA 的 8 个二硫键半胱氨酸中，ESM2-650M（masked-marginal）对 <strong>7 个</strong>给出强烈的"不可替换"判断（最佳替换的 LLR 显著为负）。</p>
+        <p>唯一失手：<strong style="color:var(--blind)">Cys120</strong> —— 模型认为最佳替换是 <code>C→K</code>，<span class="mono" style="color:var(--blind)">LLR = +0.995</span>，即<strong style="color:var(--blind)">误判该替换为有利</strong>，等于没看见这座末端二硫桥。</p>
+      </div>
+    </div>
+  </header>
+
+  <!-- DISULFIDE TOPOLOGY -->
+  <section style="border-top:0;padding-top:18px">
+    <div class="figure">
+      <div class="cap">图 1 · 成熟 αLA 1–123 的二硫键拓扑（成熟编号）</div>
+      <div class="ttl">4 座二硫桥 · 8 个 Cys · 蓝=ESM 召回，红=ESM 漏掉</div>
+      <div class="scrollx">
+      <svg viewBox="0 0 900 250" width="100%" style="min-width:620px" role="img" aria-label="αLA 四对二硫键拓扑图，6-120 28-111 61-77 73-91，其中位置120被ESM漏掉">
+        <!-- arcs -->
+        <path d="M73.6 170 Q456 -110 839.5 170" fill="none" stroke="#a50032" stroke-width="2.2" stroke-dasharray="7 5" opacity=".9"/>
+        <path d="M221.5 170 Q516 -30 779.3 170" fill="none" stroke="#9aa3ad" stroke-width="2" opacity=".85"/>
+        <path d="M443.3 170 Q497 70 550.8 170" fill="none" stroke="#9aa3ad" stroke-width="2" opacity=".85"/>
+        <path d="M523.9 170 Q584 50 644.9 170" fill="none" stroke="#9aa3ad" stroke-width="2" opacity=".85"/>
+        <!-- arc labels -->
+        <text x="456" y="40" text-anchor="middle" font-family="Menlo,monospace" font-size="12" fill="#a50032">6–120</text>
+        <text x="516" y="60" text-anchor="middle" font-family="Menlo,monospace" font-size="11" fill="#5e5e5e">28–111</text>
+        <text x="497" y="104" text-anchor="middle" font-family="Menlo,monospace" font-size="10" fill="#5e5e5e">61–77</text>
+        <text x="584" y="88" text-anchor="middle" font-family="Menlo,monospace" font-size="10" fill="#5e5e5e">73–91</text>
+        <!-- sequence axis -->
+        <line x1="40" y1="170" x2="860" y2="170" stroke="#cccccc" stroke-width="3"/>
+        <text x="40" y="200" font-family="Menlo,monospace" font-size="11" fill="#ababab">1</text>
+        <text x="860" y="200" text-anchor="end" font-family="Menlo,monospace" font-size="11" fill="#ababab">123</text>
+        <!-- nodes -->
+        <g font-family="Menlo,monospace" font-size="11" font-weight="700">
+          <circle cx="73.6" cy="170" r="8" fill="#1f55af"/><text x="73.6" y="222" text-anchor="middle" fill="#1f55af">6</text>
+          <circle cx="221.5" cy="170" r="8" fill="#1f55af"/><text x="221.5" y="222" text-anchor="middle" fill="#1f55af">28</text>
+          <circle cx="443.3" cy="170" r="8" fill="#1f55af"/><text x="443.3" y="222" text-anchor="middle" fill="#1f55af">61</text>
+          <circle cx="523.9" cy="170" r="8" fill="#1f55af"/><text x="523.9" y="222" text-anchor="middle" fill="#1f55af">73</text>
+          <circle cx="550.8" cy="170" r="8" fill="#1f55af"/><text x="550.8" y="240" text-anchor="middle" fill="#1f55af">77</text>
+          <circle cx="644.9" cy="170" r="8" fill="#1f55af"/><text x="644.9" y="222" text-anchor="middle" fill="#1f55af">91</text>
+          <circle cx="779.3" cy="170" r="8" fill="#1f55af"/><text x="779.3" y="222" text-anchor="middle" fill="#1f55af">111</text>
+          <circle cx="839.5" cy="170" r="13" fill="none" stroke="#a50032" stroke-width="1.5" opacity=".55"/>
+          <circle cx="839.5" cy="170" r="8" fill="#a50032"/><text x="839.5" y="222" text-anchor="middle" fill="#a50032">120 ✕</text>
+        </g>
+      </svg>
+      </div>
+      <div class="legend">
+        <span><i style="background:#1f55af"></i> ESM 召回（C 不可替换，最佳替换 LLR&lt;0）× 7</span>
+        <span><i style="background:#a50032"></i> ESM 漏掉（最佳替换 LLR&gt;0）× 1 → Cys120</span>
+        <span><i style="background:#9aa3ad"></i> 二硫桥配对</span>
+      </div>
+    </div>
+    <p class="note">规律：被漏掉的 Cys120 处于 C 端、属于跨度最大的 6–120 长程二硫桥；模型对近程二硫桥（61–77、73–91）判断稳健。这提示<strong>长程 / 末端二硫键是纯序列模型的薄弱区</strong> —— 也正是结构感知模型 M2(ThermoMPNN) 应当补上的地方。</p>
+  </section>
+
+  <!-- LLR BAR CHART -->
+  <section>
+    <div class="eyebrow"><b>逐残基证据</b> · 每个二硫键 Cys 的最佳替换打分</div>
+    <h2>8 个位置的最佳替换 LLR</h2>
+    <p class="lead">LLR（log-likelihood ratio）越负，表示 ESM 越认为该位置的野生型 Cys 不可替换（召回越强）。Cys120 是唯一为正的位置 —— 模型实际偏好把它换成 Lys。</p>
+
+    <div class="llr">
+      <div class="row"><div class="lab"><b>Cys6</b> → Y</div><div class="track"><div class="zero"></div><div class="bar neg" style="left:30.0%;right:13.6%"></div></div><div class="val neg">−6.205</div></div>
+      <div class="row"><div class="lab"><b>Cys28</b> → Y</div><div class="track"><div class="zero"></div><div class="bar neg" style="left:8.6%;right:13.6%"></div></div><div class="val neg">−8.560</div></div>
+      <div class="row"><div class="lab"><b>Cys61</b> → Y</div><div class="track"><div class="zero"></div><div class="bar neg" style="left:15.7%;right:13.6%"></div></div><div class="val neg">−7.774</div></div>
+      <div class="row"><div class="lab"><b>Cys73</b> → Y</div><div class="track"><div class="zero"></div><div class="bar neg" style="left:14.4%;right:13.6%"></div></div><div class="val neg">−7.916</div></div>
+      <div class="row"><div class="lab"><b>Cys77</b> → S</div><div class="track"><div class="zero"></div><div class="bar neg" style="left:4.8%;right:13.6%"></div></div><div class="val neg">−8.981</div></div>
+      <div class="row"><div class="lab"><b>Cys91</b> → Y</div><div class="track"><div class="zero"></div><div class="bar neg" style="left:9.2%;right:13.6%"></div></div><div class="val neg">−8.490</div></div>
+      <div class="row"><div class="lab"><b>Cys111</b> → Y</div><div class="track"><div class="zero"></div><div class="bar neg" style="left:20.2%;right:13.6%"></div></div><div class="val neg">−7.286</div></div>
+      <div class="row"><div class="lab" style="color:var(--blind)"><b style="color:var(--blind)">Cys120</b> → K</div><div class="track"><div class="zero"></div><div class="bar pos" style="left:86.4%;width:7.0%"></div></div><div class="val pos">+0.995</div></div>
+      <div class="axis"><div></div><div class="scale"><span class="l">−9</span><span class="z">0</span><span class="r">+1.5</span></div><div></div></div>
+    </div>
+
+    <div class="scrollx">
+    <table class="tbl">
+      <thead><tr><th>mature pos</th><th>WT</th><th>best substitution</th><th>ESM LLR</th><th>judgement</th></tr></thead>
+      <tbody>
+        <tr><td>6</td><td>C</td><td>Y</td><td>−6.205</td><td class="ok">recalled</td></tr>
+        <tr><td>28</td><td>C</td><td>Y</td><td>−8.560</td><td class="ok">recalled</td></tr>
+        <tr><td>61</td><td>C</td><td>Y</td><td>−7.774</td><td class="ok">recalled</td></tr>
+        <tr><td>73</td><td>C</td><td>Y</td><td>−7.916</td><td class="ok">recalled</td></tr>
+        <tr><td>77</td><td>C</td><td>S</td><td>−8.981</td><td class="ok">recalled</td></tr>
+        <tr><td>91</td><td>C</td><td>Y</td><td>−8.490</td><td class="ok">recalled</td></tr>
+        <tr><td>111</td><td>C</td><td>Y</td><td>−7.286</td><td class="ok">recalled</td></tr>
+        <tr class="miss"><td>120</td><td>C</td><td>K</td><td>+0.995</td><td>MISSED</td></tr>
+      </tbody>
+    </table>
+    </div>
+  </section>
+
+  <!-- INTERPRETATION -->
+  <section>
+    <div class="eyebrow"><b>这意味着什么</b></div>
+    <h2>序列模型 vs 结构约束</h2>
+    <div class="cards">
+      <div class="card seq">
+        <div class="ic">M1 · 纯序列视角</div>
+        <h4>ESM 从序列共现里"推断"二硫键</h4>
+        <p>ESM 没有结构输入，只能从进化序列模式推断哪里该是 Cys。对大多数二硫键这套先验成立 —— 但对 C 端长程配对 6–120，序列信号不足，模型甚至偏好 C→K。</p>
+        <p>这正是项目要测的东西：<strong>模型的先验在这个蛋白上哪里可信、哪里不可信。</strong></p>
+      </div>
+      <div class="card str">
+        <div class="ic">M2 · 结构视角（待跑）</div>
+        <h4>结构应当抓住 ESM 漏掉的桥</h4>
+        <p>ThermoMPNN 直接看 1B9O 的三维坐标，Cys120–Cys6 的空间邻近与共价约束对它是显式信息。因此 M2 是 M1 的<strong>正交验证</strong>。</p>
+        <p>若 M2 在 Cys120 上给出强失稳信号，就证明"换一种模态即可补盲"；若 M2 也漏，则盲点更深。两种结果都有价值。</p>
+      </div>
+    </div>
+
+    <div class="callout">
+      <div class="h">这一结果说明了什么</div>
+      <p>这正是项目所要刻画的那类缺陷：一个可复现、可定位的失效点。它界定了模型在该蛋白上的可信边界——对二硫键，尤其是长程配对，ESM 的判断需要结构信号加以校正，而不宜直接采用。这也回到第 1 页的起点：在依赖模型预测改造位点之前，先确认它是否真的理解了这个蛋白。</p>
+    </div>
+  </section>
+
+  <!-- SANITY -->
+  <section>
+    <div class="eyebrow"><b>同批次 sanity check</b> · 矩阵整体是否健康</div>
+    <h2>WT-recovery 与运行元数据</h2>
+    <p class="lead">二硫键测试之外，整张矩阵还做了野生型恢复率检查，确认打分整体可信。</p>
+    <div class="stats">
+      <div class="stat"><div class="v">76.4<small>%</small></div><div class="l">WT-recovery（94 / 123 位点野生型即最优，无任何替换得正分）</div></div>
+      <div class="stat"><div class="v">29<small> / 123</small></div><div class="l">存在 ESM 偏好替换的位点（含二硫键 Cys120，其余多为表面 / C 端）</div></div>
+      <div class="stat"><div class="v">2337</div><div class="l">打分行数 = 123 位点 × ~19 替换</div></div>
+      <div class="stat"><div class="v">650M</div><div class="l">esm2_t33_650M_UR50D · masked-marginal · device cuda</div></div>
+    </div>
+    <p class="note">运行元数据：run_date 2026-06-06 · git 9cff69f · results/m1_esm_zeroshot/run_metadata.json</p>
+  </section>
+
+  <!-- PROVENANCE / CORRECTION -->
+  <section>
+    <div class="eyebrow"><b>数据校勘</b> · 为什么这里写 7/8</div>
+    <div class="prove">
+      <div class="h">⚖ 一处必须讲清的口径更正</div>
+      <p style="font-size:14px;color:var(--gray);margin-top:4px">本页给出的二硫键召回数是 <strong>7/8</strong>，直接按项目自身 notebook 的判据（"某替换 LLR 为正 = 模型没看见该约束"）对 <span class="mono" style="color:var(--blind)">esm_dms_matrix.tsv</span> 的 2337 行实测打分重新核算。项目早期的记忆与摘要里曾记为 <span class="was">4/8</span> 等结论，与实测不一致 —— 本页以实测为准，并且<strong>未改动任何原始文件</strong>。</p>
+      <table>
+        <thead><tr><th>项目</th><th>早期摘要 / 记忆所记</th><th>实测矩阵重算（本页采用）</th></tr></thead>
+        <tbody>
+          <tr><td>二硫键 Cys 召回</td><td class="was">4 / 8</td><td class="is">7 / 8</td></tr>
+          <tr><td>漏掉的位置</td><td class="was">C6–C120 整对漏掉</td><td class="is">仅 Cys120（Cys6 实测 LLR=−6.205，强召回）</td></tr>
+          <tr><td>二硫键配对写法</td><td class="was">…C61–C76 / C73–C90</td><td class="is">C61–C77 / C73–C91（与 known_effects.tsv、源码一致）</td></tr>
+        </tbody>
+      </table>
+      <p class="note" style="margin-top:14px">三重互证：源码 <span class="mono">DISULFIDE_CYS_POSITIONS=(6,28,61,73,77,91,111,120)</span> · notebook 判据 · 2337 行实测 LLR。所有对外数字均以此实测为准。</p>
+    </div>
+  </section>
+
+  <footer>
+    <div class="prov">
+      <b>来源声明 ·</b> 本页所有数字来自 <span class="mono">results/m1_esm_zeroshot/esm_dms_matrix.tsv</span>（逐残基 LLR）与 <span class="mono">run_metadata.json</span>；二硫键位置与配对来自 <span class="mono">results/m0_benchmark/known_effects.tsv</span> 及 <span class="mono">src/m1/esm_zeroshot.py</span>。召回判据采用项目 notebook nb02 的定义。核验日期 2026-06-06，未修改任何原始文件。
+    </div>
+    <div class="pager">
+      <a class="prev" href="protein.html"><div class="dir">← 上一页</div><div class="t">01 · 背景与方法</div></a>
+      <a class="next" href="training-evidence.html"><div class="dir">下一支柱 →</div><div class="t">04 · 模型训练 · Finer</div></a>
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>
